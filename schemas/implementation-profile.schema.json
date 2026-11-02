@@ -1,0 +1,218 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Non-normative realtime optical implementation profile (proposal v0.1)",
+  "description": "Companion metadata for backend implementation; does not extend recipe.schema.json or promote physics candidates.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "version",
+    "status",
+    "scope",
+    "mechanisms",
+    "pipeline",
+    "stack",
+    "validation",
+    "provenance"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]+$"
+    },
+    "version": {
+      "const": "0.1.0"
+    },
+    "status": {
+      "enum": [
+        "proposal",
+        "candidate",
+        "tested",
+        "approved"
+      ]
+    },
+    "scope": {
+      "type": "string",
+      "minLength": 25
+    },
+    "mechanisms": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "operator_id",
+          "implementation",
+          "limitations"
+        ],
+        "properties": {
+          "operator_id": {
+            "enum": [
+              "microfacet-scatter",
+              "fresnel-dielectric",
+              "fresnel-conductor",
+              "thin-film-interference",
+              "multilayer-interference",
+              "diffraction-grating",
+              "volume-scattering",
+              "volume-absorption",
+              "volume-emission",
+              "refraction-snell",
+              "caustic-transport",
+              "view-dependent-weight",
+              "spectral-integrate"
+            ]
+          },
+          "implementation": {
+            "type": "string",
+            "minLength": 5
+          },
+          "limitations": {
+            "type": "string",
+            "minLength": 20
+          }
+        }
+      }
+    },
+    "pipeline": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "direct_light",
+        "environment_light",
+        "color_management"
+      ],
+      "properties": {
+        "direct_light": {
+          "type": "object",
+          "required": [
+            "distribution",
+            "fresnel",
+            "geometry",
+            "roughness_mapping"
+          ],
+          "properties": {
+            "distribution": {
+              "const": "GGX"
+            },
+            "fresnel": {
+              "const": "Schlick"
+            },
+            "geometry": {
+              "type": "string"
+            },
+            "roughness_mapping": {
+              "const": "alpha=perceptual_roughness^2"
+            }
+          },
+          "additionalProperties": false
+        },
+        "environment_light": {
+          "type": "object",
+          "required": [
+            "approach",
+            "prefiltered_map",
+            "brdf_lut",
+            "assumption"
+          ],
+          "properties": {
+            "approach": {
+              "const": "split-sum"
+            },
+            "prefiltered_map": {
+              "type": "string"
+            },
+            "brdf_lut": {
+              "type": "string"
+            },
+            "assumption": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        },
+        "color_management": {
+          "type": "string",
+          "minLength": 15
+        }
+      }
+    },
+    "stack": {
+      "type": "object",
+      "required": [
+        "reference",
+        "baseline_consumer",
+        "fallback"
+      ],
+      "properties": {
+        "reference": {
+          "type": "string"
+        },
+        "baseline_consumer": {
+          "type": "string"
+        },
+        "fallback": {
+          "type": "string"
+        },
+        "experimental": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "validation": {
+      "type": "object",
+      "required": [
+        "requirements",
+        "unverified"
+      ],
+      "properties": {
+        "requirements": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "type": "string"
+          }
+        },
+        "unverified": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "provenance": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "source",
+          "status"
+        ],
+        "properties": {
+          "source": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "source-derived",
+              "implementation-proposal",
+              "historical-reference"
+            ]
+          },
+          "page_or_section": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

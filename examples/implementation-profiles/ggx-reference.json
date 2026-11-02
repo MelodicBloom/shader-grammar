@@ -1,0 +1,77 @@
+{
+  "id": "ggx-metallic-roughness-reference",
+  "version": "0.1.0",
+  "status": "candidate",
+  "scope": "Reference implementation profile for ordinary isotropic opaque dielectric and metallic reflection under local and image-based lighting; not a universal iridescent or volumetric solver.",
+  "mechanisms": [
+    {
+      "operator_id": "microfacet-scatter",
+      "implementation": "Isotropic GGX NDF; perceptual roughness r mapped to alpha=r*r; alpha clamped to avoid singular evaluation.",
+      "limitations": "No anisotropy, multiple-scattering energy compensation or spectral microfacet distribution in this candidate."
+    },
+    {
+      "operator_id": "fresnel-dielectric",
+      "implementation": "Schlick 5th-power Fresnel with approximate F0=0.04 for common nonmetal cases.",
+      "limitations": "Constant F0 is an artistic interchange convention, not a measured spectral index or exact Fresnel."
+    },
+    {
+      "operator_id": "fresnel-conductor",
+      "implementation": "Metallic-roughness RGB F0 mixing for viewport interoperability.",
+      "limitations": "Not equivalent to spectral complex IOR n(lambda), k(lambda); should not replace the conductor optical operator."
+    }
+  ],
+  "pipeline": {
+    "direct_light": {
+      "distribution": "GGX",
+      "fresnel": "Schlick",
+      "geometry": "Schlick-Smith k=(r+1)^2/8 for punctual direct lighting only",
+      "roughness_mapping": "alpha=perceptual_roughness^2"
+    },
+    "environment_light": {
+      "approach": "split-sum",
+      "prefiltered_map": "Environment cubemap GGX prefiltered by roughness mip; sample by reflection vector.",
+      "brdf_lut": "2D LUT over NdotV and roughness; scale*F0 + bias.",
+      "assumption": "Historical n=v prefilter approximation; elongated grazing highlights may be lost."
+    },
+    "color_management": "Linear-light evaluation, consistent texture encodings and tone mapping; record renderer color-space settings."
+  },
+  "stack": {
+    "reference": "WebGL 2 + GLSL ES 3.00 minimal shader reference on analytic sphere.",
+    "baseline_consumer": "Three.js MeshStandardMaterial or MeshPhysicalMaterial; adapters must not fork canonical recipe semantics.",
+    "fallback": "Accessible HTML description and static visual specimen when GPU unavailable.",
+    "experimental": [
+      "WebGPU/WGSL parity",
+      "path-traced reference images",
+      "spectral extension"
+    ]
+  },
+  "validation": {
+    "requirements": [
+      "Numerically compare GGX D, Schlick F, masking function and grazing-angle stability against independent reference values.",
+      "Evaluate direct and IBL separately; compare against importance-sampled reference across at least five roughness values and three view angles.",
+      "Render identical geometry and fixed camera/light/environment per specimen; track frame time, GPU compatibility, energy behavior and visual difference.",
+      "Test no-GPU fallback and label approximations, measured results and unknowns distinctly."
+    ],
+    "unverified": [
+      "No GPU benchmark or validated glTF parity is implied by this seed.",
+      "No implementation demonstrates thin film, birefringence, diffraction, scattering or acoustic behavior."
+    ]
+  },
+  "provenance": [
+    {
+      "source": "Brian Karis, Real Shading in Unreal Engine 4, SIGGRAPH 2013 slides 5-17",
+      "status": "historical-reference",
+      "page_or_section": "5-17"
+    },
+    {
+      "source": "qt314wink/shader-grammar/catalog/operators.json",
+      "status": "source-derived",
+      "page_or_section": "microfacet-scatter, dielectric/conductor Fresnel"
+    },
+    {
+      "source": "Cross-paper governed immersive system synthesis, 2026-10-08",
+      "status": "implementation-proposal",
+      "page_or_section": "reference backend, QA and fallback"
+    }
+  ]
+}
