@@ -27,10 +27,10 @@ void main(){
  vec3 p=vec3(r*cos(a),r*sin(a),(tube+ribbon)*sin(twist)*(.8+energy*.5));
  p.z+=energy*.20*sin(a*winding-t+b);
  p.xy=rot(yaw*.45)*p.xy;p.yz=rot(pitch+.38)*p.yz;p.xz=rot(-.24+yaw*.4)*p.xz;
- float depth=4.8-p.z;vec2 screen=p.xy*2.1/depth;
+ float depth=4.8-p.z;vec2 screen=p.xy*1.9/depth;
  float aspect=resolution.x/resolution.y;
- screen.x/=aspect;
- screen+=vec2(aspect>1.0?.15:0.,aspect>1.0?-.21:-.33);
+ screen*=min(aspect,1.);screen.x/=aspect;
+ screen+=vec2(aspect>1.0?.15:0.,aspect>1.0?-.16:-.33);
  gl_Position=vec4(screen,0.,1.);
  float h=fract(sin(id*127.1+seed*31.7)*43758.5453);
  gl_PointSize=clamp((.7+h*.8)*(resolution.y/700.)*(4.8/depth),.65,2.8);
@@ -74,4 +74,4 @@ function hash(){render();const pixels=new Uint8Array(canvas.width*canvas.height*
 export function challenge(){const before={...state},wasPlaying=playing;playing=false;const checks=[];const check=(question,pass,detail)=>checks.push({question,pass,detail});try{state=normalize(fixtures[0]);const a=hash(),b=hash();check('Can the same frame reproduce exactly?',a===b,`${a} / ${b}`);state.energy=1;const c=hash();check('Does energy change the rendered outcome?',c!==a,`${a} → ${c}`);state.energy=fixtures[0].energy;check('Can the edit be reversed exactly?',hash()===a,`restored ${hash()}`);const hashes=fixtures.map(f=>{state=normalize(f);return hash();});check('Are all fixtures visually distinct?',new Set(hashes).size===3,hashes.join(' / '));const bad=normalize({energy:999,coherence:-9,symmetry:25,time:Infinity,palette:8,yaw:99,pitch:-99,seed:0});check('Are hostile inputs bounded?',bad.energy===1&&bad.coherence===0&&bad.symmetry===12&&bad.palette===2&&bad.yaw===Math.PI&&bad.seed===1,JSON.stringify(bad));check('Did the GPU report an error?',gl.getError()===gl.NO_ERROR,'WebGL error code 0 expected');}finally{state=before;playing=wasPlaying;sync();render();}return checks;}
 $('#challenge').onclick=()=>{const results=challenge();$('#qa').textContent=`SYSTEM CHALLENGE — ${results.filter(x=>x.pass).length}/${results.length} PASS\n\n`+results.map(x=>`${x.pass?'PASS':'FAIL'} · ${x.question}\n${x.detail}`).join('\n\n');$('#info').showModal();};
 window.aether={getState:()=>({...state}),setState:s=>{playing=false;state=normalize(s);sync();render();},fixtures,challenge,hash,render};
-let last=0,frames=0,perfStart=0;function animate(now){if(last&&playing){state.time=(state.time+Math.min((now-last)/1000,.1))%60;syncTime();}last=now;if(field)render();frames++;if(now-perfStart>1500){$('#performance').textContent=`${Math.round(frames*1000/(now-perfStart))} FPS · 129,600 POINTS · SEED 314`;frames=0;perfStart=now;}requestAnimationFrame(animate);}sync();requestAnimationFrame(animate);
+let last=0,frames=0,perfStart=0;function animate(now){if(last&&playing){state.time=(state.time+Math.min((now-last)/1000,.1))%60;syncTime();}last=now;if(field&&(playing||canvas.width!==Math.round(canvas.clientWidth*Math.min(devicePixelRatio,1.75))||canvas.height!==Math.round(canvas.clientHeight*Math.min(devicePixelRatio,1.75)))){render();frames++;}if(now-perfStart>1500){$('#performance').textContent=`${playing?Math.round(frames*1000/(now-perfStart))+' FPS':'PAUSED'} · 129,600 POINTS · SEED 314`;frames=0;perfStart=now;}requestAnimationFrame(animate);}sync();requestAnimationFrame(animate);

@@ -11,10 +11,10 @@
   "distinct_fixtures": true,
   "gpu_error": 0,
   "frames": 7,
-  "elapsed_seconds": 0.661,
+  "elapsed_seconds": 0.562,
   "hashes": [
-    "69e1742c1bf1139675dafb265870d3472857321b5f107be6378f5174fc14fe0c",
-    "ebe7df72b21038c1be67a88bfe503248b9b787b4c608a01c3425fa9ca6d221be",
-    "367f1ca5e2d24b6a05a7a9ccdfb726c2ac51d48081338d3dcf86c5db4be6a81c"
+    "c656eeeef31e6b5331639d9b322dd9f4f416cf99534c236a408ef26afcc01654",
+    "8209cba3bf179692f6132d61ff0d9c4751186217a258ed6e0b85675c2f3e0b6e",
+    "3095d5074db52840446774d10d6a4fc3cabb32524c29769ffc2dcfd821e3235c"
   ]
 }
