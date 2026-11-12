@@ -11,6 +11,7 @@ await page.locator('#results').evaluate(e=>e.hidden=true);
 await page.screenshot({path:'reports/desktop.png',fullPage:true});
 const original=await page.evaluate(()=>window.aether.state);
 await page.getByRole('button',{name:/Solar bloom/}).click();await page.locator('#undo').click();
+results.push({question:'Preset label follows undo?',pass:(await page.locator('#scene').textContent())==='01 — RESONANCE'});
 results.push({question:'Preset undo restores exact state?',pass:JSON.stringify(original)===JSON.stringify(await page.evaluate(()=>window.aether.state))});
 await page.locator('#energy').focus();await page.keyboard.press('ArrowRight');const changed=await page.evaluate(()=>window.aether.state.energy);results.push({question:'Keyboard control changes energy?',pass:changed>original.energy});
 await page.locator('#reset').click();results.push({question:'Reset restores fixture zero?',pass:JSON.stringify(await page.evaluate(()=>window.aether.state))===JSON.stringify(original)});
