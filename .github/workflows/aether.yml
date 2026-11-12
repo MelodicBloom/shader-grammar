@@ -10,7 +10,7 @@ permissions:
   id-token: write
 jobs:
   verify:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     defaults:
       run:
         working-directory: experiments/aether-observatory
@@ -27,15 +27,3 @@ jobs:
         with:
           name: visual-qa
           path: experiments/aether-observatory/reports
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: experiments/aether-observatory/dist
-  deploy:
-    needs: verify
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - uses: actions/deploy-pages@v4
-        id: deployment
