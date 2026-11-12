@@ -1,0 +1,20 @@
+{
+  "renderer": "llvmpipe (LLVM 19.1.7, 256 bits)",
+  "dimensions": [
+    1000,
+    700
+  ],
+  "compile_link": true,
+  "identical_replay": true,
+  "energy_response": true,
+  "exact_reversal": true,
+  "distinct_fixtures": true,
+  "gpu_error": 0,
+  "frames": 7,
+  "elapsed_seconds": 0.661,
+  "hashes": [
+    "69e1742c1bf1139675dafb265870d3472857321b5f107be6378f5174fc14fe0c",
+    "ebe7df72b21038c1be67a88bfe503248b9b787b4c608a01c3425fa9ca6d221be",
+    "367f1ca5e2d24b6a05a7a9ccdfb726c2ac51d48081338d3dcf86c5db4be6a81c"
+  ]
+}
