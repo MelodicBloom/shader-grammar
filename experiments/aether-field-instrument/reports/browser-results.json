@@ -1,0 +1,97 @@
+[
+  {
+    "question": "Can the same frame reproduce exactly?",
+    "pass": true,
+    "detail": "80dac349 / 80dac349"
+  },
+  {
+    "question": "Does energy change the rendered outcome?",
+    "pass": true,
+    "detail": "80dac349 → e6dfa682"
+  },
+  {
+    "question": "Can the edit be reversed exactly?",
+    "pass": true,
+    "detail": "restored 80dac349"
+  },
+  {
+    "question": "Are all fixtures visually distinct?",
+    "pass": true,
+    "detail": "80dac349 / 69999c24 / 5e51c788"
+  },
+  {
+    "question": "Are hostile inputs bounded?",
+    "pass": true,
+    "detail": "{\"energy\":1,\"coherence\":0,\"symmetry\":12,\"palette\":2,\"time\":12,\"yaw\":3.141592653589793,\"pitch\":-3.141592653589793,\"seed\":1}"
+  },
+  {
+    "question": "Did the GPU report an error?",
+    "pass": true,
+    "detail": "WebGL error code 0 expected"
+  },
+  {
+    "question": "Does Bloom set the complete fixture?",
+    "pass": true,
+    "detail": ""
+  },
+  {
+    "question": "Does undo restore exact state?",
+    "pass": true,
+    "detail": ""
+  },
+  {
+    "question": "Does keyboard input change energy by 0.01?",
+    "pass": true,
+    "detail": ""
+  },
+  {
+    "question": "Does a palette button set the matching lens?",
+    "pass": true,
+    "detail": ""
+  },
+  {
+    "question": "Does time scrubbing set the requested time?",
+    "pass": true,
+    "detail": ""
+  },
+  {
+    "question": "Does reset restore the canonical fixture?",
+    "pass": true,
+    "detail": ""
+  },
+  {
+    "question": "Does direct manipulation change orientation?",
+    "pass": true,
+    "detail": ""
+  },
+  {
+    "question": "Does a state URL restore the exact paused state?",
+    "pass": true,
+    "detail": ""
+  },
+  {
+    "question": "Does capture deliver a PNG?",
+    "pass": true,
+    "detail": ""
+  },
+  {
+    "question": "Does 390×844 avoid horizontal overflow?",
+    "pass": true,
+    "detail": ""
+  },
+  {
+    "question": "Does 844×390 avoid horizontal overflow?",
+    "pass": true,
+    "detail": ""
+  },
+  {
+    "question": "Does reduced motion start paused?",
+    "pass": true,
+    "detail": ""
+  },
+  {
+    "question": "Are there zero browser runtime errors?",
+    "pass": true,
+    "detail": []
+  }
+]

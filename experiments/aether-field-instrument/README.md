@@ -1,5 +1,9 @@
 # AETHER — Field instrument
 
+[Open the live instrument](https://aether-field-instrument-314.qt-314wink.chatgpt.site) · [Verified browser challenge](https://github.com/MelodicBloom/shader-grammar/actions/runs/43131175637)
+
+Final browser result: **19/19 passed** on revision `5529e8c`. Desktop, portrait and landscape screenshots and the measured results are committed under `reports/`. The live Site is owner-private.
+
 An independent GLSL ES 3.00 / WebGL 2 experiment. Open `dist/index.html` through any static HTTP server. No build, runtime libraries, backend, or AI API is required. Fonts have system fallbacks.
 
 ## Definition of done
