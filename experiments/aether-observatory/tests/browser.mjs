@@ -15,7 +15,7 @@ results.push({question:'Preset undo restores exact state?',pass:JSON.stringify(o
 await page.locator('#energy').focus();await page.keyboard.press('ArrowRight');const changed=await page.evaluate(()=>window.aether.state.energy);results.push({question:'Keyboard control changes energy?',pass:changed>original.energy});
 await page.locator('#reset').click();results.push({question:'Reset restores fixture zero?',pass:JSON.stringify(await page.evaluate(()=>window.aether.state))===JSON.stringify(original)});
 for(const width of [390,844]){await page.setViewportSize({width,height:width===390?844:390});await page.screenshot({path:`reports/mobile-${width}.png`,fullPage:true});results.push({question:`No horizontal overflow at ${width}px?`,pass:await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)})}
-const hash=encodeURIComponent(JSON.stringify({...original,phase:123}));await page.goto('http://127.0.0.1:4173/#'+hash);await page.waitForFunction(()=>window.aether);results.push({question:'Shared URL restores exact paused phase?',pass:(await page.evaluate(()=>window.aether.state.phase))===123});
+const hash=encodeURIComponent(JSON.stringify({...original,phase:123}));await page.goto('http://127.0.0.1:4173/#'+hash);await page.waitForFunction(()=>window.aether?.state.phase===123);results.push({question:'Shared URL restores exact paused phase?',pass:(await page.evaluate(()=>window.aether.state.phase))===123});
 results.push({question:'No browser runtime errors?',pass:errors.length===0,measurement:errors});
 await writeFile('reports/qa.json',JSON.stringify(results,null,2));console.log(JSON.stringify(results,null,2));await browser.close();server.close();
 // GPU performance is reported separately: software CI is not representative of a physical GPU.
