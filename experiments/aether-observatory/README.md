@@ -38,4 +38,14 @@ This is an adversarial acceptance scorecard, not a fabricated third-party benchm
 ## Limits
 WebGL2 required. No audio input. Phase is periodic, not a physics simulation. Fixed rendering pixel ratio capped at 1.5. Continuous animation remains device-dependent; use pause for precise comparisons. No formal user satisfaction study performed.
 
-This isolated visual experiment does not claim to implement the repository’s optical operator ontology or physical energy conservation. Energy is a normalized artistic parameter. It does not replace archived Aether or Nacre Atelier.
+## Version 2: actual 3D and reproducible orientation
+
+The previous version used image-space curves. V2 replaces them with a parametric 3D toroidal mesh, depth-tested triangles, contour lines and perspective projection. X/Y/Z are rigid model rotations, composed as `Rz * Ry * Rx`. Camera distance is separate. Drag changes X/Y; Shift-drag changes Z. The canvas also supports arrow keys and Shift-left/right; Home restores the view. Sliders provide touch and keyboard access to every axis. Undo restores a complete drag, camera and phase; reset restores the entire canonical fixture.
+
+Versioned state URLs include shape, phase, all three axes and camera distance, and open paused. V1 URLs without a version remain valid parameter inputs but adopt the new 3D geometry and default camera; they do not reproduce the old 2D pixels. Future unsupported versions are rejected visibly. Determinism applies within the same graphics implementation, viewport and pixel ratio (capped at 1.5); hardware differences may change rasterization. Physical replay has measurement tolerances and is a separate question.
+
+The model has 9,457 vertices and 18,432 triangles. Its parameterization is implemented in `model.js` and GLSL in `renderer.js`. `R=.76+.12E+.09sin(nu+phase)`, `a=.22+.07E`, `w=v+T*pi*sin(2u+phase)`, and `p=((R+a cos w)cos u,(R+a cos w)sin u,a sin w+.055E sin(nu+phase))`. All coordinates are dimensionless. The sculpture is a geometrical artistic model, not a numerical solution to a wave equation.
+
+The new acceptance suite additionally checks nonzero depth, each rotation axis changing pixels, 360-degree canonical equivalence, rigid-distance invariance, restored pixel equality, drag/roll undo, full camera replay, keyboard orbit, reduced motion, PNG export, paused rendering and an on-page Socratic experiment. Software-GPU timing remains measured with completed pixel readback. Paused scenes do not redraw continuously.
+
+[From pattern to instrument](dist/applications.html) develops the real-world abstraction and separates established acoustic/photonic examples from proposed work. Its research sources and a falsifiable acoustic experiment plan are included in the live demo.

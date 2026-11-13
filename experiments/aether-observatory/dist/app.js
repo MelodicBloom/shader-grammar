@@ -1,30 +1,133 @@
-const $=s=>document.querySelector(s),canvas=$('#canvas');
-const fixtures=[{energy:0.65,harmonics:6,twist:0.38,hue:0.48,phase:0},{energy:0.9,harmonics:9,twist:0.72,hue:0.08,phase:90},{energy:0.35,harmonics:4,twist:0.18,hue:0.72,phase:180}];
-const bounds={energy:[0,1,.01,'Energy','Emission & radial expansion'],harmonics:[3,12,1,'Harmonics','Number of rotational lobes'],twist:[0,1,.01,'Torsion','Angular deformation / 0–1 turn'],hue:[0,1,.01,'Spectrum','Palette offset / 0–1 cycle']};
-let state={...fixtures[0]},history=[],playing=!matchMedia('(prefers-reduced-motion: reduce)').matches,gl=canvas.getContext('webgl2',{preserveDrawingBuffer:true,antialias:false}),last=0,frames=0,stamp=0;
-function normalize(s){const o={};for(const [k,[a,b,step]] of Object.entries(bounds)){let v=Number(s[k]);o[k]=Number.isFinite(v)?Math.round(Math.max(a,Math.min(b,v))/step)*step:fixtures[0][k]}o.phase=Number.isFinite(+s.phase)?Math.max(0,Math.min(360,+s.phase)):0;return o}
-try{if(location.hash){state=normalize(JSON.parse(decodeURIComponent(location.hash.slice(1))));playing=false}}catch{}
-function remember(){history.push({...state});if(history.length>100)history.shift()}
-function sync(){const active=fixtures.findIndex(f=>Object.keys(bounds).every(k=>Math.abs(f[k]-state[k])<1e-6));document.querySelectorAll('[data-preset]').forEach(b=>b.classList.toggle('selected',+b.dataset.preset===active));$('#scene').textContent=active<0?'CUSTOM — USER FIELD':['01 — RESONANCE','02 — SOLAR BLOOM','03 — AFTERGLOW'][active];for(const k in bounds){$('#'+k).value=state[k];$('#'+k+'Value').textContent=k==='harmonics'?state[k]+'×':state[k].toFixed(2)}$('#phase').value=state.phase;$('#phaseValue').textContent=String(Math.round(state.phase)).padStart(3,'0')+'°';$('#play').textContent=playing?'Ⅱ':'▶';$('#play').setAttribute('aria-label',playing?'Pause animation':'Play animation');explain()}
-for(const [k,[min,max,step,label,help]] of Object.entries(bounds)){const d=document.createElement('div');d.className='control';d.innerHTML=`<label for="${k}">${label}<output id="${k}Value"></output></label><input id="${k}" type="range" min="${min}" max="${max}" step="${step}"><small>${help}</small>`;$('#controls').append(d);$('#'+k).onpointerdown=remember;$('#'+k).onkeydown=e=>{if(e.key.startsWith('Arrow')||['Home','End','PageUp','PageDown'].includes(e.key))remember()};$('#'+k).oninput=e=>{state[k]=+e.target.value;sync()}}
-function explain(){const texts={Engineering:`Energy ${state.energy.toFixed(2)} drives radius and emission. Torsion is bounded to one turn. No simulation drift.`,Mathematical:`r = 0.57 + 0.12E + 0.08 sin(${state.harmonics}θ + φ). Phase φ loops every 360°.`, 'Art direction':'Fine luminous filaments create depth; the darker core gives the eye a place to rest.','Reverse inference':'Want a wider silhouette? Increase energy. Want more petals? Increase harmonics. Each has a bounded cause.','Socratic inquiry':'What changes if energy stays fixed while torsion rises? Pause, adjust one control, then Undo to compare.'};$('#explanation').textContent=texts[$('#lens').value]}
-addEventListener('hashchange',()=>{try{const next=normalize(JSON.parse(decodeURIComponent(location.hash.slice(1))));remember();state=next;playing=false;sync();draw()}catch{$('#notice').textContent='Invalid state link; current state retained.'}});
-$('#lens').onchange=explain;$('#play').onclick=()=>{playing=!playing;sync()};$('#phase').onpointerdown=()=>{remember();playing=false};$('#phase').onkeydown=e=>{if(e.key.startsWith('Arrow')||['Home','End','PageUp','PageDown'].includes(e.key))remember()};$('#phase').oninput=e=>{playing=false;state.phase=+e.target.value;sync()};$('#undo').onclick=()=>{if(history.length)state=history.pop();sync()};$('#reset').onclick=()=>{remember();state={...fixtures[0]};sync()};document.querySelectorAll('[data-preset]').forEach(b=>b.onclick=()=>{remember();state={...fixtures[+b.dataset.preset]};document.querySelectorAll('[data-preset]').forEach(x=>x.classList.toggle('selected',x===b));$('#scene').textContent=['01 — RESONANCE','02 — SOLAR BLOOM','03 — AFTERGLOW'][+b.dataset.preset];sync()});
-$('#share').onclick=async()=>{const url=new URL(location.href);url.hash=encodeURIComponent(JSON.stringify(state));try{await navigator.clipboard.writeText(url.href);$('#notice').textContent='State link copied. Reopens at this exact phase.'}catch{location.hash=url.hash;$('#notice').textContent='State saved in the address bar.'}};
-$('#capture').onclick=()=>{draw();const a=document.createElement('a');a.download='aether-'+Math.round(state.phase)+'.png';a.href=canvas.toDataURL();a.click()};
-const vertex=`#version 300 es
-in vec2 position;void main(){gl_Position=vec4(position,0,1);}`;
-const fragment=`#version 300 es
-precision highp float;out vec4 outColor;uniform vec2 resolution;uniform float phase,energy,harmonics,twist,hue;
-#define PI 3.14159265359
-mat2 rot(float a){return mat2(cos(a),-sin(a),sin(a),cos(a));}
-vec3 palette(float t){return .52+.48*cos(6.28318*(vec3(0.0,.20,.38)+t));}
-void main(){vec2 p=(2.*gl_FragCoord.xy-resolution)/resolution.y; p*=1.22;vec3 col=vec3(.012,.021,.024);float phi=phase*PI/180.;vec2 q=p; q.y*=1.12;float rad=length(q);float ang=atan(q.y,q.x);vec3 light=vec3(0.);
-for(int i=0;i<48;i++){float f=float(i)/47.;vec2 v=q;v*=rot(.25*sin(phi)+f*twist*2.2);v.y/= .48+.52*sin(f*PI);float a=atan(v.y,v.x);float r=length(v);float base=.57+.12*energy+.08*sin(harmonics*a+phi+f*6.28318*twist);float target=base*(.62+.48*sin(f*PI));float d=abs(r-target);float line=.0017/(d+.0017);float glow=.000055/(d*d+.00015);float front=.35+.65*f;light+=palette(hue+f*.16+a*.025)*(pow(line,2.)*.32+glow*.022)*front;}
-float halo=exp(-abs(rad-.75)*6.)*.035;col+=light*(1.5+energy*2.0)+palette(hue)*halo;float core=exp(-rad*rad*18.);col+=palette(hue+.1)*core*.06;float ring=abs(rad-1.08);col+=vec3(.11,.22,.18)*.001/(ring+.001);float dash=step(.94,cos(ang*80.));col+=vec3(.12,.2,.16)*dash*.0018/(abs(rad-1.11)+.003);vec2 grid=abs(fract(p*14.+.5)-.5);col+=vec3(.035,.07,.055)*step(min(grid.x,grid.y),.014)*.18;col*=1.-.22*length(p);col=1.-exp(-col*1.15);outColor=vec4(pow(max(col,0.),vec3(.87)),1.);}`;
-let program,uniforms={};function shader(type,src){const s=gl.createShader(type);gl.shaderSource(s,src);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))throw Error(gl.getShaderInfoLog(s));return s}
-try{if(!gl)throw Error('WebGL 2 is unavailable. Enable hardware acceleration or use a WebGL 2 browser.');program=gl.createProgram();gl.attachShader(program,shader(gl.VERTEX_SHADER,vertex));gl.attachShader(program,shader(gl.FRAGMENT_SHADER,fragment));gl.linkProgram(program);if(!gl.getProgramParameter(program,gl.LINK_STATUS))throw Error(gl.getProgramInfoLog(program));gl.useProgram(program);const b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),gl.STATIC_DRAW);const loc=gl.getAttribLocation(program,'position');gl.enableVertexAttribArray(loc);gl.vertexAttribPointer(loc,2,gl.FLOAT,false,0,0);for(const k of ['resolution','phase',...Object.keys(bounds)])uniforms[k]=gl.getUniformLocation(program,k)}catch(e){$('#notice').textContent=e.message;$('#fps').textContent='RENDERER UNAVAILABLE'}
-function draw(){if(!program)return;const w=Math.round(canvas.clientWidth*Math.min(devicePixelRatio,1.5)),h=Math.round(canvas.clientHeight*Math.min(devicePixelRatio,1.5));if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;gl.viewport(0,0,w,h)}gl.uniform2f(uniforms.resolution,w,h);for(const k of ['phase',...Object.keys(bounds)])gl.uniform1f(uniforms[k],state[k]);gl.drawArrays(gl.TRIANGLES,0,3)}
-function tick(t){if(playing&&last)state.phase=(state.phase+Math.min(t-last,100)*.012)%360;last=t;draw();sync();frames++;if(t-stamp>1000){$('#fps').textContent=Math.round(frames*1000/(t-stamp))+' FPS';frames=0;stamp=t}requestAnimationFrame(tick)}
-async function qa(){const saved={...state},was=playing;playing=false;const results=[];function check(q,ok,detail){results.push({question:q,pass:!!ok,measurement:detail})}check('Does GLSL ES 3.00 compile and link?',program&&gl.getProgramParameter(program,gl.LINK_STATUS),'WebGL2 program link');if(program){const pixels=()=>{draw();const a=new Uint8Array(canvas.width*canvas.height*4);gl.readPixels(0,0,canvas.width,canvas.height,gl.RGBA,gl.UNSIGNED_BYTE,a);return a};for(let i=0;i<3;i++){state={...fixtures[i]};const a=pixels(),b=pixels();let diff=0,lit=0;for(let j=0;j<a.length;j++){if(a[j]!==b[j])diff++;if(j%4!==3&&a[j]>30)lit++}check('Fixture '+i+' identical redraw?',diff===0,diff+' differing bytes');check('Fixture '+i+' visible structure?',lit>1000,lit+' channels >30')}const n=normalize({energy:99,harmonics:-4,twist:Infinity,hue:-2,phase:900});check('Do out-of-range inputs stay bounded?',n.energy===1&&n.harmonics===3&&n.hue===0&&n.phase===360,JSON.stringify(n));state={...fixtures[0]};const a=pixels();state.energy=1;const b=pixels();check('Does energy measurably affect output?',a.some((v,i)=>v!==b[i]),'pixel comparison');state={...fixtures[0]};const start=performance.now();for(let i=0;i<10;i++){state.phase=i*12;pixels()}const ms=(performance.now()-start)/10;check('Can renderer meet 30 FPS?',ms<33.34,ms.toFixed(2)+' ms/render including readback at '+canvas.width+'×'+canvas.height+'; device-dependent')}check('WebGL context healthy?',!gl.isContextLost()&&gl.getError()===gl.NO_ERROR,'context and error state');state=saved;playing=was;sync();$('#results').hidden=false;$('#results').textContent=JSON.stringify(results,null,2);window.qaResults=results;return results}
-$('#qa').onclick=qa;window.aether={qa,fixtures,get state(){return {...state}},setState:s=>{state=normalize(s);playing=false;sync();draw()},draw};sync();requestAnimationFrame(tick);
+import {defaults, fixtures, controls, shapeKeys, normalize, rotationExperiment, rotationMatrix, rotate, surfacePoint} from './model.js';
+import {Renderer} from './renderer.js';
+const $ = s => document.querySelector(s), canvas = $('#canvas');
+let state = normalize(defaults), undo = [], renderer, playing = !matchMedia('(prefers-reduced-motion: reduce)').matches;
+let dirty=true, origin=0, clock=performance.now(), lastFrame=0, frameCount=0, fpsClock=0;
+function status(message){$('#notice').textContent=message;}
+function remember(){undo.push({...state});if(undo.length>100)undo.shift();}
+function pause(){playing=false;syncTransport();}
+try { if(location.hash){state=normalize(JSON.parse(decodeURIComponent(location.hash.slice(1))));playing=false;} }
+catch(e){status(e.message+' Default state loaded.');}
+function format(key,value){return ['rx','ry','rz'].includes(key)?value+'°':key==='harmonics'?value+'×':key==='zoom'?value.toFixed(1):value.toFixed(2);}
+function addControl(key,container){
+  const [min,max,step,label,help]=controls[key],div=document.createElement('div');div.className='control';
+  div.innerHTML=`<label for="${key}">${label}<output id="${key}Value"></output></label><input id="${key}" type="range" min="${min}" max="${max}" step="${step}"><small>${help}</small>`;
+  $(container).append(div);const input=$('#'+key);
+  input.addEventListener('pointerdown',()=>{remember();pause();});
+  input.addEventListener('keydown',e=>{if(/Arrow|Home|End|Page/.test(e.key)){remember();pause();}});
+  input.addEventListener('input',e=>{pause();state=normalize({...state,[key]:+e.target.value});dirty=true;sync();});
+}
+for(const key of shapeKeys)addControl(key,'#controls');
+for(const key of ['rx','ry','rz','zoom'])addControl(key,'#view-controls');
+function syncTransport(){
+  $('#phase').value=state.phase;$('#phaseValue').textContent=String(Math.round(state.phase)%360).padStart(3,'0')+'°';
+  $('#play').textContent=playing?'Ⅱ':'▶';$('#play').setAttribute('aria-label',playing?'Pause animation':'Play animation');
+  if(!playing)$('#fps').textContent='PAUSED';
+}
+function explain(){
+  const texts={
+    Engineering:'Shape and view are separate. Drag rotates X/Y; Shift-drag rolls Z. Depth-tested geometry occludes its far side. Energy is an artistic control, not watts.',
+    Mathematical:'p = ((R+a cos w)cos u, (R+a cos w)sin u, a sin w + h). View = Rz · Ry · Rx · p, followed by perspective projection.',
+    'Art direction':'A dark solid shell supports luminous contours. Rotation reveals thickness, occlusion and parallax; light follows the same 3D surface.',
+    'Reverse inference':'Want a side view? Change Y to 90°, leaving shape fixed. Want a larger tube? Change visual energy. A silhouette alone cannot uniquely identify a 3D object.',
+    'Socratic inquiry':'Is the shape changing, or only your viewpoint? Pause, rotate one axis, then test distance invariance below. What observation would falsify your claim?'
+  };$('#explanation').textContent=texts[$('#lens').value];
+}
+function sync(){
+  for(const key in controls){$('#'+key).value=state[key];$('#'+key+'Value').textContent=format(key,state[key]);}
+  const active=fixtures.findIndex(f=>shapeKeys.every(k=>Math.abs(f[k]-state[k])<1e-6));
+  document.querySelectorAll('[data-preset]').forEach(b=>b.classList.toggle('selected',+b.dataset.preset===active));
+  $('#scene').textContent=active<0?'CUSTOM — USER FIELD':['01 — RESONANCE','02 — SOLAR BLOOM','03 — AFTERGLOW'][active];
+  $('#pose').textContent=`X ${state.rx}° / Y ${state.ry}° / Z ${state.rz}°`;
+  $('#undo').disabled=undo.length===0;syncTransport();explain();
+}
+function setState(next){state=normalize(next);pause();dirty=true;sync();draw();}
+function draw(){if(renderer){try{renderer.draw(state);dirty=false;}catch(e){pause();status(e.message);}}}
+$('#lens').onchange=explain;
+$('#play').onclick=()=>{playing=!playing;origin=state.phase;clock=performance.now();dirty=true;syncTransport();};
+$('#phase').onpointerdown=()=>{remember();pause();};
+$('#phase').onkeydown=e=>{if(/Arrow|Home|End|Page/.test(e.key)){remember();pause();}};
+$('#phase').oninput=e=>setState({...state,phase:+e.target.value});
+$('#undo').onclick=()=>{if(undo.length)setState(undo.pop());};
+$('#reset').onclick=()=>{remember();setState(defaults);};
+const views={front:{rx:0,ry:0,rz:0},side:{rx:0,ry:90,rz:0},top:{rx:90,ry:0,rz:0},home:{rx:defaults.rx,ry:defaults.ry,rz:defaults.rz,zoom:defaults.zoom}};
+for(const b of document.querySelectorAll('[data-view]'))b.onclick=()=>{remember();setState({...state,...views[b.dataset.view]});};
+for(const b of document.querySelectorAll('[data-preset]'))b.onclick=()=>{remember();setState(fixtures[+b.dataset.preset]);};
+let drag;
+canvas.addEventListener('pointerdown',e=>{
+  if(!e.isPrimary||e.button!==0)return;remember();pause();canvas.focus({preventScroll:true});canvas.setPointerCapture(e.pointerId);
+  drag={id:e.pointerId,x:e.clientX,y:e.clientY,rx:state.rx,ry:state.ry,rz:state.rz,roll:e.shiftKey};
+});
+canvas.addEventListener('pointermove',e=>{
+  if(!drag||e.pointerId!==drag.id)return;
+  const dx=e.clientX-drag.x,dy=e.clientY-drag.y;
+  state=normalize({...state,...(drag.roll?{rz:drag.rz+dx*.4}:{rx:drag.rx+dy*.4,ry:drag.ry+dx*.4})});dirty=true;sync();
+});
+function endDrag(e){if(drag?.id===e.pointerId){drag=undefined;if(canvas.hasPointerCapture(e.pointerId))canvas.releasePointerCapture(e.pointerId);}}
+canvas.addEventListener('pointerup',endDrag);canvas.addEventListener('pointercancel',endDrag);canvas.addEventListener('lostpointercapture',()=>{drag=undefined;});
+canvas.addEventListener('keydown',e=>{
+  const keys={ArrowLeft:['ry',-5],ArrowRight:['ry',5],ArrowUp:['rx',-5],ArrowDown:['rx',5]};
+  if(keys[e.key]){e.preventDefault();remember();const [axis,delta]=keys[e.key];const key=e.shiftKey&&axis==='ry'?'rz':axis;setState({...state,[key]:state[key]+delta});}
+  if(e.key==='Home'){e.preventDefault();remember();setState({...state,...views.home});}
+});
+async function share(){
+  pause();state=normalize(state);sync();draw();const url=new URL(location.href);url.hash=encodeURIComponent(JSON.stringify(state));
+  window.history.replaceState(null,'',url);try{await navigator.clipboard.writeText(url.href);status('Copied exact shape, phase, X/Y/Z and camera. Opens paused.');}
+  catch{status('Exact state saved in the address bar. Copy that URL to reproduce it.');}return url.href;
+}
+$('#share').onclick=share;
+addEventListener('hashchange',()=>{try{const next=normalize(JSON.parse(decodeURIComponent(location.hash.slice(1))));remember();setState(next);}catch(e){status(e.message+' Current state retained.');}});
+$('#capture').onclick=()=>{
+  pause();draw();if(!renderer)return;const output=document.createElement('canvas');output.width=canvas.width;output.height=canvas.height;
+  const context=output.getContext('2d');context.fillStyle='#050b10';context.fillRect(0,0,output.width,output.height);context.drawImage(canvas,0,0);
+  const a=document.createElement('a');a.download='aether-3d-'+Math.round(state.phase)+'.png';a.href=output.toDataURL();a.click();
+};
+$('#experiment').onclick=()=>{
+  pause();const result=rotationExperiment(state);
+  $('#experiment-result').textContent=`${result.pass?'PASS':'FAIL'} · ${result.samples} sampled points. Maximum radius error after X/Y/Z rotation: ${result.maxNormError.toExponential(2)} model units. Object depth: ${result.objectDepth.toFixed(3)} units. Rotation changes the view while preserving distance from the origin.`;
+};
+new ResizeObserver(()=>{dirty=true;}).observe(canvas);
+canvas.addEventListener('webglcontextlost',e=>{e.preventDefault();pause();status('Graphics context lost. Reload to restore this saved state.');});
+try{renderer=new Renderer(canvas);$('#mesh').textContent=renderer.stats.vertices.toLocaleString()+' VERTICES / DEPTH TESTED';}
+catch(e){playing=false;status(e.message);$('#fps').textContent='UNAVAILABLE';}
+function tick(t){
+  if(playing&&renderer){state.phase=(origin+(t-clock)*.012)%360;dirty=true;syncTransport();}
+  if(dirty&&renderer){draw();frameCount++;}
+  if(playing&&t-fpsClock>1000){$('#fps').textContent=Math.round(frameCount*1000/(t-fpsClock))+' FPS';frameCount=0;fpsClock=t;}
+  lastFrame=t;requestAnimationFrame(tick);
+}
+async function qa(){
+  const saved={...state},was=playing;pause();const results=[];
+  const check=(question,pass,measurement)=>results.push({question,pass:!!pass,measurement});
+  const diff=(a,b)=>a.reduce((n,v,i)=>n+(v!==b[i]?1:0),0);
+  check('GLSL ES 3.00 compile and link?',renderer&&renderer.gl.getProgramParameter(renderer.program,renderer.gl.LINK_STATUS),'3D vertex + fragment program');
+  if(renderer){
+    for(let i=0;i<fixtures.length;i++){
+      const fixture=normalize(fixtures[i]),a=renderer.read(fixture),b=renderer.read(fixture);const delta=diff(a,b);
+      check(`Fixture ${i}: exact same-device redraw?`,delta===0,delta+' differing bytes');
+      let lit=0;for(let k=0;k<a.length;k+=4)if(a[k]+a[k+1]+a[k+2]>60)lit++;
+      check(`Fixture ${i}: visible sculpture?`,lit>1000,lit+' lit pixels');
+    }
+    const base=normalize(defaults),front={...base,rx:0,ry:0,rz:0},a=renderer.read(front);
+    for(const axis of ['rx','ry','rz']){
+      const other={...front,[axis]:67},delta=diff(a,renderer.read(other));
+      check(`${axis}: real view change?`,delta>1000,delta+' changed bytes');
+    }
+    const orbit=rotationExperiment(base);check('3D thickness and rigid rotation invariance?',orbit.pass,orbit);
+    check('Full turn returns exact image?',diff(a,renderer.read(normalize({...front,ry:360})))===0,'canonical 360° → 0°');
+    const baseline=renderer.read(base);renderer.read({...base,rx:-52,ry:37,rz:61});
+    check('Returning to orientation restores pixels?',diff(baseline,renderer.read(base))===0,'exact readback after intervening rotation');
+    const normalized=normalize({...base,energy:999,harmonics:-20,twist:Infinity,zoom:-4,rx:720,phase:-1});
+    check('Hostile input stays bounded?',normalized.energy===1&&normalized.harmonics===3&&normalized.twist===defaults.twist&&normalized.zoom===2.8&&normalized.rx===0&&normalized.phase===359,normalized);
+    check('Energy alters geometry?',Math.abs(surfacePoint(0,0,base)[0]-surfacePoint(0,0,{...base,energy:1})[0])>.01,'model-space radius comparison');
+    // Readback forces completed output, not merely command submission. Warm up first.
+    renderer.read(base);const started=performance.now();for(let i=0;i<10;i++)renderer.read({...base,phase:i*12});
+    const ms=(performance.now()-started)/10;check('Completed rendering under 33.34 ms?',ms<33.34,{msPerFrame:+ms.toFixed(2),width:canvas.width,height:canvas.height,includesReadback:true});
+    const gl=renderer.gl;check('Healthy depth-tested WebGL context?',!gl.isContextLost()&&gl.getError()===gl.NO_ERROR&&gl.isEnabled(gl.DEPTH_TEST),renderer.stats);
+  }
+  state=saved;playing=was;origin=state.phase;clock=performance.now();dirty=true;sync();draw();
+  $('#results').hidden=false;$('#results').textContent=JSON.stringify(results,null,2);window.qaResults=results;return results;
+}
+$('#qa').onclick=qa;
+window.aether={qa,fixtures,defaults,get state(){return {...state};},setState,draw,share,rotationExperiment:()=>rotationExperiment(state),get stats(){return renderer?.stats;}};
+sync();origin=state.phase;clock=performance.now();requestAnimationFrame(tick);
