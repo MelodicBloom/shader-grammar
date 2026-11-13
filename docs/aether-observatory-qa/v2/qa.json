@@ -1,0 +1,215 @@
+[
+  {
+    "question": "GLSL ES 3.00 compile and link?",
+    "pass": true,
+    "measurement": "3D vertex + fragment program"
+  },
+  {
+    "question": "Fixture 0: exact same-device redraw?",
+    "pass": true,
+    "measurement": "0 differing bytes"
+  },
+  {
+    "question": "Fixture 0: visible sculpture?",
+    "pass": true,
+    "measurement": "51184 lit pixels"
+  },
+  {
+    "question": "Fixture 1: exact same-device redraw?",
+    "pass": true,
+    "measurement": "0 differing bytes"
+  },
+  {
+    "question": "Fixture 1: visible sculpture?",
+    "pass": true,
+    "measurement": "65881 lit pixels"
+  },
+  {
+    "question": "Fixture 2: exact same-device redraw?",
+    "pass": true,
+    "measurement": "0 differing bytes"
+  },
+  {
+    "question": "Fixture 2: visible sculpture?",
+    "pass": true,
+    "measurement": "37098 lit pixels"
+  },
+  {
+    "question": "rx: real view change?",
+    "pass": true,
+    "measurement": "812405 changed bytes"
+  },
+  {
+    "question": "ry: real view change?",
+    "pass": true,
+    "measurement": "811764 changed bytes"
+  },
+  {
+    "question": "rz: real view change?",
+    "pass": true,
+    "measurement": "482025 changed bytes"
+  },
+  {
+    "question": "3D thickness and rigid rotation invariance?",
+    "pass": true,
+    "measurement": {
+      "samples": 512,
+      "maxNormError": 4.440892098500626e-16,
+      "objectDepth": 0.6024344918477618,
+      "pass": true
+    }
+  },
+  {
+    "question": "Full turn returns exact image?",
+    "pass": true,
+    "measurement": "canonical 360° → 0°"
+  },
+  {
+    "question": "Returning to orientation restores pixels?",
+    "pass": true,
+    "measurement": "exact readback after intervening rotation"
+  },
+  {
+    "question": "Hostile input stays bounded?",
+    "pass": true,
+    "measurement": {
+      "version": 2,
+      "energy": 1,
+      "harmonics": 3,
+      "twist": 0.38,
+      "hue": 0.48,
+      "rx": 0,
+      "ry": -18,
+      "rz": 16,
+      "zoom": 2.8,
+      "phase": 359
+    }
+  },
+  {
+    "question": "Energy alters geometry?",
+    "pass": true,
+    "measurement": "model-space radius comparison"
+  },
+  {
+    "question": "Completed rendering under 33.34 ms?",
+    "pass": false,
+    "measurement": {
+      "msPerFrame": 74.97,
+      "width": 1023,
+      "height": 783,
+      "includesReadback": true
+    }
+  },
+  {
+    "question": "Healthy depth-tested WebGL context?",
+    "pass": true,
+    "measurement": {
+      "draws": 34,
+      "vertices": 9457,
+      "triangles": 18432,
+      "segments": 10368
+    }
+  },
+  {
+    "question": "Side view changes only pose?",
+    "pass": true
+  },
+  {
+    "question": "Undo restores exact camera and shape?",
+    "pass": true
+  },
+  {
+    "question": "Preset undo restores state and label?",
+    "pass": true
+  },
+  {
+    "question": "rx slider responds to keyboard?",
+    "pass": true
+  },
+  {
+    "question": "ry slider responds to keyboard?",
+    "pass": true
+  },
+  {
+    "question": "rz slider responds to keyboard?",
+    "pass": true
+  },
+  {
+    "question": "Drag rotates X/Y, holding shape fixed?",
+    "pass": true
+  },
+  {
+    "question": "One undo reverses an entire drag?",
+    "pass": true
+  },
+  {
+    "question": "Shift-drag rolls Z only?",
+    "pass": true
+  },
+  {
+    "question": "Canvas keyboard orbit works?",
+    "pass": true
+  },
+  {
+    "question": "Shape control responds to keyboard?",
+    "pass": true
+  },
+  {
+    "question": "Reset restores full fixture?",
+    "pass": true
+  },
+  {
+    "question": "Socratic experiment reports a measured invariant?",
+    "pass": true
+  },
+  {
+    "question": "Paused GPU stops redrawing?",
+    "pass": true,
+    "measurement": "63 draws before pause check"
+  },
+  {
+    "question": "Animation advances phase without rotating camera?",
+    "pass": true
+  },
+  {
+    "question": "No overflow at 390px?",
+    "pass": true
+  },
+  {
+    "question": "No overflow at 844px?",
+    "pass": true
+  },
+  {
+    "question": "Fresh URL restores every shape/phase/camera field?",
+    "pass": true
+  },
+  {
+    "question": "Shared view opens paused?",
+    "pass": true
+  },
+  {
+    "question": "Open-tab hash replay restores camera?",
+    "pass": true
+  },
+  {
+    "question": "Unknown state versions are rejected visibly?",
+    "pass": true
+  },
+  {
+    "question": "PNG export downloads?",
+    "pass": true
+  },
+  {
+    "question": "Applications distinguish art from physical evidence?",
+    "pass": true
+  },
+  {
+    "question": "Reduced motion starts paused?",
+    "pass": true
+  },
+  {
+    "question": "No browser exceptions?",
+    "pass": true,
+    "measurement": []
+  }
+]

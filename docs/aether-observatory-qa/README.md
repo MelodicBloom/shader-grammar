@@ -1,4 +1,6 @@
-# AETHER verification receipt
+# AETHER v1 verification receipt
+
+**Superseded by the [v2 true-3D verification receipt](v2/README.md).** The current live URL serves v2; the measurements below describe the earlier implementation.
 
 [Live interactive runtime](https://shader-grammar-energetic-observatory.qt-314wink.chatgpt.site) (owner-private Sites hosting).
 [Source and method](../../experiments/aether-observatory/README.md).
